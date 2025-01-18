@@ -4,11 +4,11 @@ const createItem = (req, res) => {
   const { name, weather, imageUrl, owner } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner });
-  owner: req.user._id
+  req.user._id
     .then((item) => {
       res.send({ data: item });
     })
-    .catch((e) => {
+    .catch((err) => {
       if (err.name === "ValidationError") {
         res.status(400).send({ message: "Error: Error Message", e });
       }
@@ -27,9 +27,9 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
+    .orFail(item)
     .then((item) => res.status(200).send({ message: "Successfully deleted" }))
-    .catch(() => {
+    .catch((err) => {
       if ((err.name = "DocumentNotFoundError")) {
         res.status(404).send({ message: "Error not found" });
       } else if (err.name === "CastError") {
