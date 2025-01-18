@@ -1,14 +1,17 @@
 const ClothingItem = require("../models/clothingItem");
 
 const createItem = (req, res) => {
-  const { name, weather, imageUrl } = req.body;
+  const { name, weather, imageUrl, owner } = req.body;
 
-  ClothingItem.create({ name, weather, imageUrl })
+  ClothingItem.create({ name, weather, imageUrl, owner });
+  owner: req.user._id
     .then((item) => {
       res.send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error: Error Message", e });
+      if (err.name === "ValidationError") {
+        res.status(400).send({ message: "Error: Error Message", e });
+      }
     });
 };
 
@@ -16,19 +19,7 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((e) => {
-      res.status(500).send({ message: Error, e });
-    });
-};
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      res.status(500).send({ message: Error, e });
+      res.status(500).send({ message: "An error occured on the server", e });
     });
 };
 
@@ -37,10 +28,14 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({}))
-    .catch((e) => {
-      res.status(500).send({ message: Error, e });
+    .then((item) => res.status(200).send({ message: "Successfully deleted" }))
+    .catch(() => {
+      if ((err.name = "DocumentNotFoundError")) {
+        res.status(404).send({ message: "Error not found" });
+      } else if (err.name === "CastError") {
+        res.status(400).send({ message: "Error: Error Message" });
+      }
     });
 };
 
-module.exports = { createItem, getItems, updateItem, deleteItem };
+module.exports = { createItem, getItems, deleteItem };
