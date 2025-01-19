@@ -7,7 +7,7 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: "Default" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -20,9 +20,9 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "BAD REQUEST" });
+        return res.status(400).send({ message: err.message });
       }
-      return res.status(500).send({ message: "DEFAULT" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -34,10 +34,11 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "NOT FOUND" });
+        return res.status(404).send({ message: err.message });
       } else if ((err.name = "CastError")) {
-        return res.status(400).send({ message: "BAD REQUEST" });
+        return res.status(400).send({ message: err.message });
       }
+      return res.status(500).send({ message: err.message });
     });
 };
 

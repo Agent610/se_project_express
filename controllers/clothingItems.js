@@ -10,7 +10,8 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({ message: "Error: Error Message", e });
+        res.status(400).send({ message: err.message });
+        res.status(500).send({ message: err.message });
       }
     });
 };
@@ -18,8 +19,8 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      res.status(500).send({ message: "An error occured on the server", e });
+    .catch(() => {
+      res.status(500).send({ message: err.message });
     });
 };
 
@@ -27,13 +28,14 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail(item)
-    .then((item) => res.status(200).send({ message: "Successfully deleted" }))
+    .orFail()
+    .then(() => res.status(200).send({ message: err.message }))
     .catch((err) => {
       if ((err.name = "DocumentNotFoundError")) {
-        res.status(404).send({ message: "Error not found" });
+        res.status(404).send({ message: err.message });
       } else if (err.name === "CastError") {
-        res.status(400).send({ message: "Error: Error Message" });
+        res.status(400).send({ message: err.message });
+        res.status(500).send({ message: err.message });
       }
     });
 };
