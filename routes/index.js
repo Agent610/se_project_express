@@ -5,7 +5,7 @@ const userRouter = require("./users");
 
 router.use("/items", clothingItem);
 router.use("/users", userRouter);
-router.use((req, res) => {
+router.use((req, res, err) => {
   res.status(404).send({ message: err.message });
 });
 
