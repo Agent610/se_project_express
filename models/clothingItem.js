@@ -24,8 +24,14 @@ const clothingItemSchema = new mongoose.Schema({
     },
   },
   owner: {
-    type: ObjectId,
+    type: String,
     required: true,
+    validate: {
+      validator(ObjectId) {
+        return validator.isURL(ObjectId);
+      },
+      message: "You must enter a valid link",
+    },
   },
   likes: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
