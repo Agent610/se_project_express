@@ -1,13 +1,22 @@
 const User = require("../models/user");
+const {
+  SUCCESS,
+  CREATE,
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+} = require("../utils/errors");
 
 // GET / users
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) =>
+      res.status(SUCCESS).send(users, { message: "User was found" })
+    )
     .catch((err) => {
       console.error(err);
-      return res.status(500).send("An error has occured on the server");
+      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -16,13 +25,15 @@ const getUsers = (req, res) => {
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(CREATE).send(user, { message: "Create a user" }))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Bad request user not found" });
       }
-      return res.status(500).send("An error has occured on the server");
+      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -30,15 +41,16 @@ const getUser = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.status(SUCCESS).send(user, { message: "Get user" }))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: err.message });
-      } else if ((err.name = "CastError")) {
-        return res.status(400).send({ message: err.message });
+        return res.status(NOT_FOUND).send({ message: "User not found" });
       }
-      return res.status(500).send("An error has occured on the server");
+      if ((err.name = "CastError")) {
+        return res.status(BAD_REQUEST).send({ message: "Bad request" });
+      }
+      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
