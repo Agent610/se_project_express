@@ -47,8 +47,8 @@ const createUser = (req, res) => {
     });
 };
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
+const getCurrentUser = (req, res) => {
+  const { userId } = req.user;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS).send({ message: "Get user", user }))
@@ -80,4 +80,5 @@ const login = (req, res) => {
       res.status(DEFAULT).send({ message: "Default" });
     });
 };
-module.exports = { getUsers, createUser, getUser, login };
+
+module.exports = { getUsers, createUser, getCurrentUser, login };
