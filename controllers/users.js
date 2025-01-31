@@ -11,24 +11,11 @@ const {
   INCORRECT,
 } = require("../utils/errors");
 
-// GET / users
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) =>
-      res.status(SUCCESS).send({ message: "User was found", users })
-    )
-    .catch((err) => {
-      console.error(err);
-      return res.status(DEFAULT).send({ message: "Default" });
-    });
-};
-
 // POST / creating a user
 
 const createUser = (req, res) => {
-  const { name, avatar, email, password } = req.body;
-  User.create({ name, avatar, email, password })
+  const { password, name, avatar, email } = req.body;
+  User.create({ password, name, avatar, email })
     .then((user) => res.status(CREATE).send(user))
     .catch((err) => {
       console.error(err);
@@ -48,7 +35,7 @@ const createUser = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user;
+  const { userId } = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS).send({ message: "Get user", user }))
@@ -63,7 +50,7 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -81,4 +68,4 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getCurrentUser, login };
+module.exports = { createUser, getCurrentUser };

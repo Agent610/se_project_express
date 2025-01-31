@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const mainRouter = require("./routes/index");
-const routes = require("./routes");
 const cors = require("cors");
+const routes = require("./routes");
+const mainRouter = require("./routes/index");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -12,12 +12,10 @@ mongoose
   .then(() => {})
   .catch(console.error);
 
-app.use(routes);
-app.use(express.json());
-app.use("/", mainRouter);
-app.use(cors());
-
 app.post("/signin", login);
 app.post("/signup", createUser);
+app.use(cors());
+app.use(express.json());
+app.use("/", mainRouter);
 
 app.listen(PORT, () => {});
