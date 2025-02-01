@@ -1,5 +1,6 @@
 const { response } = require("express");
 const User = require("../models/user");
+const { token } = require("../utils/config");
 const {
   SUCCESS,
   CREATE,
@@ -15,7 +16,8 @@ const {
 
 const createUser = (req, res) => {
   const { password, name, avatar, email } = req.body;
-  User.create({ password, name, avatar, email })
+  User.create({ name, avatar, email })
+    .select("+password")
     .then((user) => res.status(CREATE).send(user))
     .catch((err) => {
       console.error(err);
@@ -50,16 +52,25 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-module.exports.login = (req, res) => {
+const login = (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Error: Email and password not entered" });
+  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      res.status(SUCCESS).send({ message: "Login success" });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      return res.status(SUCCESS).send({ message: "Login success" });
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === "LoginFailed") {
+      if (err.message === "LoginFailed") {
         return res
           .status(INCORRECT)
           .send({ message: "Entered email or password is incorrect" });
@@ -68,4 +79,4 @@ module.exports.login = (req, res) => {
     });
 };
 
-module.exports = { createUser, getCurrentUser };
+module.exports = { createUser, getCurrentUser, login };
