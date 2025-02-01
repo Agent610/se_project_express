@@ -19,6 +19,6 @@ app.use(express.json());
 app.post("/signin", login);
 app.post("/signup", createUser);
 app.use("/", mainRouter);
-app.use("routes");
+app.use(routes());
 
 app.listen(PORT, () => {});

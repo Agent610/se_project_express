@@ -1,6 +1,6 @@
-const { response } = require("express");
+//const { response } = require("express");
 const User = require("../models/user");
-const { token } = require("../utils/config");
+//const { token } = require("../utils/config");
 const {
   SUCCESS,
   CREATE,
@@ -15,29 +15,41 @@ const {
 // POST / creating a user
 
 const createUser = (req, res) => {
-  const { password, name, avatar, email } = req.body;
-  User.create({ name, avatar, email })
-    .select("+password")
-    .then((user) => res.status(CREATE).send(user))
+  const { name, avatar, email, password } = req.body;
+  return bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: hash,
+      })
+    )
+    .then((user) =>
+      res.status(CREATE).send({
+        _id: user._id,
+        email: user.email,
+      })
+    )
     .catch((err) => {
       console.error(err);
+      if (err.code === "ERROR") {
+        return res
+          .status(REGISTRATION_ERROR)
+          .send({ message: "Email is connected with another account" });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(BAD_REQUEST)
           .send({ message: "Bad request user not found" });
-        return res
-          .status(ERROR)
-          .send({ message: "Same user information was entered" });
-        return res
-          .status(REGISTRATION_ERROR)
-          .send({ message: "Error in registration" });
       }
       return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user._id;
+  const userId = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(SUCCESS).send({ message: "Get user", user }))
@@ -70,7 +82,7 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.message === "LoginFailed") {
+      if (err.message === "Incorrect email or password") {
         return res
           .status(INCORRECT)
           .send({ message: "Entered email or password is incorrect" });
@@ -79,4 +91,14 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { createUser, getCurrentUser, login };
+const updateUser = (req, res) => {
+  const { name, avatar } = req.body;
+
+  if (!name || !avatar) {
+    return res
+      .status(SUCCESS)
+      .send({ message: "Name and Avatar has been changed" });
+  }
+};
+
+module.exports = { createUser, getCurrentUser, login, updateUser };

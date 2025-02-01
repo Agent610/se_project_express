@@ -1,3 +1,5 @@
+const token = require("../middlewares/auth");
+
 const token =
   ({ _id: user._id },
   {

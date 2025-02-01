@@ -37,10 +37,7 @@ const getItems = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  const { itemId, _id } = req.params;
-  itemId = _id;
-  if (err.message === "Incorrect ID");
-  then(() => res.status(REQUEST_DENIED).send({ message: "Request deny" }));
+  const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .orFail()
@@ -50,10 +47,10 @@ const deleteItem = (req, res) => {
           .status(REQUEST_DENIED)
           .send({ message: "You can't delete this" });
       }
-    });
-  return;
-  deleteOne()
-    .then(() => res.status(SUCCESS).send({ message: "Item was deleted" }))
+      return item
+        .deleteOne()
+        .then(() => res.status(SUCCESS).send({ message: "Item was deleted" }));
+    })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({ message: "Item was not found" });
