@@ -34,7 +34,7 @@ const createUser = (req, res) => {
     )
     .catch((err) => {
       console.error(err);
-      if (err.code === "ERROR") {
+      if (err.code === ERROR) {
         return res
           .status(REGISTRATION_ERROR)
           .send({ message: "Email is connected with another account" });
