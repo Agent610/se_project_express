@@ -97,17 +97,21 @@ const updateUser = (req, res) => {
 
   if (!name || !avatar) {
     return res
-      .status(SUCCESS)
-      .send({ message: "Name and Avatar has been changed" });
+      .status(BAD_REQUEST)
+      .send({ message: "Name or Avatar could not be updated" });
   }
-  return User.findByIDAndUpdate(req.user._id, { User }, { new: true })
-    .then(() => res.send({ data: true }))
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .then((user) => res.status(SUCCESS).send({ user }))
     .catch((err) => {
       console.error(err);
-      if (err.message === "Name and Avatar can't be changed") {
+      if (err.name === "ValidationError") {
         return res
-          .status(INCORRECT)
-          .send({ message: "Name or Avatar can't be changed" });
+          .status(BAD_REQUEST)
+          .send({ message: "Name or Avatar could not be updated" });
       }
       return res.status(DEFAULT).send({ message: "Default" });
     });
