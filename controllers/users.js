@@ -1,5 +1,6 @@
-const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 const {
   SUCCESS,
@@ -75,10 +76,10 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
-      return res.status(SUCCESS).send({ message: "Login success" });
+      return res.status(SUCCESS).send({ token, message: "Login success" });
     })
     .catch((err) => {
       console.error(err);
@@ -87,7 +88,7 @@ const login = (req, res) => {
           .status(INCORRECT)
           .send({ message: "Entered email or password is incorrect" });
       }
-      res.status(DEFAULT).send({ message: "Default" });
+      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -99,6 +100,17 @@ const updateUser = (req, res) => {
       .status(SUCCESS)
       .send({ message: "Name and Avatar has been changed" });
   }
+  return User.findByIDAndUpdate(req.user._id, { User }, { new: true })
+    .then(() => res.send({ data: true }))
+    .catch((err) => {
+      console.error(err);
+      if (err.message === "Name and Avatar can't be changed") {
+        return res
+          .status(INCORRECT)
+          .send({ message: "Name or Avatar can't be changed" });
+      }
+      return res.status(DEFAULT).send({ message: "Default" });
+    });
 };
 
 module.exports = { createUser, getCurrentUser, login, updateUser };
