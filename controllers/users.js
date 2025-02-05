@@ -13,6 +13,8 @@ const {
   INCORRECT,
 } = require("../utils/errors");
 
+const { JWT_SECRET } = require("../utils/config");
+
 // POST / creating a user
 
 const createUser = (req, res) => {
@@ -76,7 +78,7 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       return res.status(SUCCESS).send({ token, message: "Login success" });

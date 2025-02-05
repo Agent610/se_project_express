@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { INCORRECT } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
@@ -12,7 +13,7 @@ const auth = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, process.env.JWT_SECRET);
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     return res.status(INCORRECT).send({ message: "Authorization error" });
   }
