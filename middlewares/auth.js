@@ -22,26 +22,4 @@ const auth = (req, res, next) => {
   return next();
 };
 
-// Sprint 14
-
-const signUp = ({ email, password, name, avatar }) => {
-  return fetch(`${baseUrl}/items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, avatar, email, password }),
-  });
-};
-
-const signIn = ({ email, password }) => {
-  return fetch(`${baseUrl}/items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-};
-
 module.exports = auth;
