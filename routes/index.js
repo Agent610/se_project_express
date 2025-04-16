@@ -1,29 +1,28 @@
 const router = require("express").Router();
+const { Joi, celebrate } = require("celebrate");
 const { login, createUser } = require("../controllers/users");
-const { NOT_FOUND } = require("../utils/errors");
 const clothingItem = require("./clothingItems");
 const userRouter = require("./users");
-const { Joi, celebrate } = require("celebrate");
 const NotFoundError = require("../utils/NotFoundError");
 
-const signIn = {
+const signInLogic = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 };
 
-const signUp = {
+const signUpLogic = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
     name: Joi.string().required(),
-    avatar: Joi.string().required(url),
+    avatar: Joi.string().required().uri(),
   }),
 };
 
-router.post("/signin", celebrate(signIn), login);
-router.post("/signup", celebrate(signUp), createUser);
+router.post("/signin", celebrate(signInLogic), login);
+router.post("/signup", celebrate(signUpLogic), createUser);
 
 router.use("/items", clothingItem);
 router.use("/users", userRouter);

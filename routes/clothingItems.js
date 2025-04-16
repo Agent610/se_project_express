@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const auth = require("../middlewares/auth");
 const { Joi, celebrate } = require("celebrate");
+const auth = require("../middlewares/auth");
 
 const {
   createItem,
@@ -10,23 +10,23 @@ const {
   deleteLike,
 } = require("../controllers/clothingItems");
 
-const createItem = {
-  name: Joi.string().required,
-  weather: Joi.string().required("hot", "warm", "cold"),
-  imageUrl: Joi.string().required(url),
+const createItemLogic = {
+  name: Joi.string().required(),
+  weather: Joi.string().valid("hot", "warm", "cold").required(),
+  imageUrl: Joi.string().required().uri(),
 };
 
-const itemId = {
+const itemIdLogic = {
   params: Joi.object().keys({
     itemId: Joi.string()
       .required()
       .regex(/^[0-9a-fA-F]{24}$/),
   }),
 };
-router.post("/", auth, celebrate(createItem), createItem);
+router.post("/", auth, celebrate(createItemLogic), createItem);
 router.get("/", getItems);
-router.delete("/:itemId", auth, celebrate(itemId), deleteItem);
-router.put("/:itemId/likes", auth, celebrate(itemId), addLike);
-router.delete("/:itemId/likes", auth, celebrate(itemId), deleteLike);
+router.delete("/:itemId", auth, celebrate(itemIdLogic), deleteItem);
+router.put("/:itemId/likes", auth, celebrate(itemIdLogic), addLike);
+router.delete("/:itemId/likes", auth, celebrate(itemIdLogic), deleteLike);
 
 module.exports = router;

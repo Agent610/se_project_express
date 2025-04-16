@@ -3,15 +3,14 @@ const validator = require("validator");
 const { validate } = require("../models/user");
 
 // Clothing Item
-{
-  Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    imageUrl: Joi.string().required().custom(validateUrl).messages({
-      "string.empty": 'The "imageUrl" field must be filled in',
-      "string.uri": 'the "imageUrl" field must be a valid url',
-    }),
-  });
-}
+
+Joi.object().keys({
+  name: Joi.string().required().min(2).max(30),
+  imageUrl: Joi.string().required().custom(validateUrl).messages({
+    "string.empty": 'The "imageUrl" field must be filled in',
+    "string.uri": 'the "imageUrl" field must be a valid url',
+  }),
+});
 
 //User info
 {

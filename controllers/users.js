@@ -2,25 +2,17 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
-const {
-  SUCCESS,
-  CREATE,
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  REGISTRATION_ERROR,
-  ERROR,
-  INCORRECT,
-} = require("../utils/errors");
+const { SUCCESS, CREATE, ERROR } = require("../utils/errors");
 
 const { JWT_SECRET } = require("../utils/config");
 const BadRequestError = require("../utils/BadRequestError");
 const NotFoundError = require("../utils/NotFoundError");
 const UnauthorizedError = require("../utils/UnauthorizedError");
+const ConflictError = require("../utils/ConflictError");
 
 // POST / creating a user
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   return bcrypt
     .hash(password, 10)
@@ -41,9 +33,9 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.code === ERROR) {
-        return res
-          .status(REGISTRATION_ERROR)
-          .send({ message: "Email is connected with another account" });
+        return next(
+          new ConflictError("Email is connected with another account")
+        );
       }
       if (err.name === "ValidationError") {
         next(new BadRequestError("Validation error"));
@@ -53,7 +45,7 @@ const createUser = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
@@ -62,7 +54,8 @@ const getCurrentUser = (req, res) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         next(new NotFoundError("User not found"));
-      } else {
+      }
+      {
         next(err);
       }
       if (err.name === "CastError") {
@@ -73,13 +66,11 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Error: Email and password not entered" });
+    return next(new BadRequestError("Email and password not entered"));
   }
 
   return User.findUserByCredentials(email, password)
@@ -99,13 +90,11 @@ const login = (req, res) => {
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
   if (!name || !avatar) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "Name or Avatar could not be updated" });
+    return next(new BadRequestError("Name or Avatar could not be updated"));
   }
   return User.findByIdAndUpdate(
     req.user._id,
@@ -116,7 +105,7 @@ const updateUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        next(new UnauthorizedError("Name or Avatar could not be updated"));
+        next(new BadRequestError("Name or Avatar could not be updated"));
       } else {
         next(err);
       }

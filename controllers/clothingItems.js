@@ -1,14 +1,17 @@
 const ClothingItem = require("../models/clothingItem");
 const BadRequestError = require("../utils/BadRequestError");
+const ForbiddenError = require("../utils/ForbiddenError");
+const NotFoundError = require("../utils/NotFoundError");
+
 const {
   SUCCESS,
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  REQUEST_DENIED,
+  // BAD_REQUEST,
+  // NOT_FOUND,
+  // DEFAULT,
+  // REQUEST_DENIED,
 } = require("../utils/errors");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
@@ -24,28 +27,26 @@ const createItem = (req, res) => {
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (res, next) => {
   ClothingItem.find({})
     .then((items) =>
       res
         .status(SUCCESS)
         .send({ message: "Item was found successfully", items })
     )
-    .catch(() => {
-      res.status(DEFAULT).send({ message: "Default" });
+    .catch((err) => {
+      next(err);
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
       if (String(item.owner) !== req.user._id) {
-        return res
-          .status(REQUEST_DENIED)
-          .send({ message: "You can't delete this" });
+        return next(new ForbiddenError("You can't delete this"));
       }
       return item
         .deleteOne()
@@ -60,7 +61,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-const addLike = (req, res) => {
+const addLike = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -70,7 +71,7 @@ const addLike = (req, res) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Error not found" });
+        return next(new NotFoundError("Error not found"));
       }
       return res.send(item);
     })
@@ -83,7 +84,7 @@ const addLike = (req, res) => {
     });
 };
 
-const deleteLike = (req, res) => {
+const deleteLike = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findByIdAndUpdate(
@@ -93,7 +94,7 @@ const deleteLike = (req, res) => {
   )
     .then((item) => {
       if (!item) {
-        return res.status(NOT_FOUND).send({ message: "Error not found" });
+        return next(new NotFoundError("Error not found"));
       }
       return res.send(item);
     })
