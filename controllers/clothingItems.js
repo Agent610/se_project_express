@@ -1,4 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
+const BadRequestError = require("../utils/BadRequestError");
 const {
   SUCCESS,
   BAD_REQUEST,
@@ -16,11 +17,10 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: "Bad request, validation error" });
+        next(new BadRequestError("Validation error"));
+      } else {
+        next(err);
       }
-      res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -53,14 +53,10 @@ const deleteItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({ message: "Item was not found" });
-      } else if (err.name === "CastError") {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: "Search resulted in a bad request" });
+        next(new BadRequestError("Validation error"));
+      } else {
+        next(err);
       }
-
-      res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -80,9 +76,10 @@ const addLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Bad request" });
+        next(new BadRequestError("Bad request"));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -102,9 +99,10 @@ const deleteLike = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Bad request" });
+        next(new BadRequestError("Bad request"));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 

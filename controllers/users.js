@@ -14,6 +14,9 @@ const {
 } = require("../utils/errors");
 
 const { JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../utils/BadRequestError");
+const NotFoundError = require("../utils/NotFoundError");
+const UnauthorizedError = require("../utils/UnauthorizedError");
 
 // POST / creating a user
 
@@ -43,11 +46,10 @@ const createUser = (req, res) => {
           .send({ message: "Email is connected with another account" });
       }
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Bad request user not found" });
+        next(new BadRequestError("Validation error"));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -59,11 +61,15 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "User not found" });
+        next(new NotFoundError("User not found"));
+      } else {
+        next(err);
       }
-      if (err.name === "CastError")
-        return res.status(BAD_REQUEST).send({ message: "Bad request" });
-      return res.status(DEFAULT).send({ message: "Default" });
+      if (err.name === "CastError") {
+        next(new BadRequestError("Bad request"));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -86,11 +92,10 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(INCORRECT)
-          .send({ message: "Entered email or password is incorrect" });
+        next(new UnauthorizedError("Entered email or password is incorrect"));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
@@ -111,11 +116,10 @@ const updateUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Name or Avatar could not be updated" });
+        next(new UnauthorizedError("Name or Avatar could not be updated"));
+      } else {
+        next(err);
       }
-      return res.status(DEFAULT).send({ message: "Default" });
     });
 };
 
