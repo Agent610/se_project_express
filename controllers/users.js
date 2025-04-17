@@ -31,13 +31,9 @@ const createUser = (req, res, next) => {
       })
     )
     .catch((err) => {
-      console.error(err);
       if (err.code === ERROR) {
-        return next(
-          new ConflictError("Email is connected with another account")
-        );
-      }
-      if (err.name === "ValidationError") {
+        next(new ConflictError("Email is connected with another account"));
+      } else if (err.name === "ValidationError") {
         next(new BadRequestError("Validation error"));
       } else {
         next(err);
@@ -55,9 +51,9 @@ const getCurrentUser = (req, res, next) => {
       if (err.name === "DocumentNotFoundError") {
         next(new NotFoundError("User not found"));
       }
-      {
-        next(err);
-      }
+      // {
+      //   next(err);
+      // }
       if (err.name === "CastError") {
         next(new BadRequestError("Bad request"));
       } else {

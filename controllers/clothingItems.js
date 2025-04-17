@@ -27,7 +27,7 @@ const createItem = (req, res, next) => {
     });
 };
 
-const getItems = (res, next) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) =>
       res
@@ -54,7 +54,7 @@ const deleteItem = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        next(new BadRequestError("Validation error"));
+        next(new NotFoundError("Validation error"));
       } else {
         next(err);
       }

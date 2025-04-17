@@ -11,6 +11,7 @@ const {
 } = require("../controllers/clothingItems");
 
 const createItemLogic = {
+  body: Joi.object().keys(),
   name: Joi.string().required(),
   weather: Joi.string().valid("hot", "warm", "cold").required(),
   imageUrl: Joi.string().required().uri(),
